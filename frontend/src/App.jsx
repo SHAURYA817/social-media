@@ -1,121 +1,50 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+import React from 'react'
+import { Routes, Route, Navigate } from "react-router";
 
-function App() {
-  const [count, setCount] = useState(0)
+import LoginPage from './pages/LoginPage.jsx';
+import SignUpPage from './pages/SignUpPage.jsx';
+import NotificationPage from './pages/NotificationPage.jsx';
+import OnboardingPage from './pages/OnboardingPage.jsx';
+import CallPage from './pages/CallPage.jsx';
+import ChatPage from './pages/ChatPage.jsx';
+import HomePage from './pages/HomePage.jsx';
 
-  return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+import { Toaster } from 'react-hot-toast';
 
-      <div className="ticks"></div>
+import { useQuery } from '@tanstack/react-query';
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
+import {axiosInstance} from './lib/axios.js';
 
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
-  )
+const App = () => {
+  // tankstack query
+  const {data:authData, isLoading, error} = useQuery({
+    queryKey: ['authUser'],
+
+    queryFn: async () => {
+      const res = await axiosInstance.get('/auth/me');
+      return res.data;
+    },
+    retry: false, // to prevent retrying the request on failure 
+  })
+  
+  const authUser = authData?.user;
+
+
+  return <div className="h-screen" data-theme="coffee">
+    <Routes>
+      <Route path="/" element={authUser ? <HomePage /> : <Navigate to ="/login"/>} />
+      <Route path="/login" element={!authUser ? <LoginPage /> : <Navigate to="/"/>} />
+      <Route path="/signup" element={!authUser ? <SignUpPage /> : <Navigate to="/"/>} />
+      <Route path="/notifications" element={authUser ? <NotificationPage /> : <Navigate to="/login"/>} />
+      <Route path="/onboarding" element={authUser ? <OnboardingPage /> : <Navigate to="/login"/>} />
+      <Route path="/call" element={authUser ? <CallPage /> : <Navigate to="/login"/>} />
+      <Route path="/chat" element={authUser ? <ChatPage /> : <Navigate to="/login"/>} />
+
+    </Routes>
+
+    <Toaster />
+
+</div>
 }
 
 export default App
