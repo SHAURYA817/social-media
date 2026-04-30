@@ -15,14 +15,14 @@ const app = express();
 const PORT = process.env.PORT;
 
 app.use(cors({
-    origin: "http://localhost:5174",
+    origin: "http://localhost:5173", // frontend url
     credentials: true, // to allow cookies to be sent from frontend to backend
 }))
 app.use(express.json()) 
 app.use(cookieParser())
 
 app.use("/api/auth", authRoutes);
-app.use("/api/user", userRoutes);
+app.use("/api/users", userRoutes);
 app.use("/api/chat", chatRoutes);
 import { connectDB } from './lib/db.js';
 

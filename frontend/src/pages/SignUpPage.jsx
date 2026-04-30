@@ -1,6 +1,9 @@
 import { useState } from "react"
 import { ShipWheelIcon } from "lucide-react";
 import { Link } from "react-router-dom";
+//import { useMutation, useQueryClient } from "@tanstack/react-query";
+//import { signUp } from "../lib/api.js";
+import useSignUp from "../hooks/useSignUp.js";
 
 const SignUpPage = () => {
   const [SignUpData, setSignUpData] = useState({
@@ -9,8 +12,23 @@ const SignUpPage = () => {
     password: '',
   })
 
+   // This is how we did it at first, without using our custom hook
+  // const queryClient = useQueryClient();
+  // const {
+  //   mutate: signupMutation,
+  //   isPending,
+  //   error,
+  // } = useMutation({
+  //   mutationFn: signup,
+  //   onSuccess: () => queryClient.invalidateQueries({ queryKey: ["authUser"] }),
+  // });
+
+  // This is how we did it using our custom hook - optimized version
+  const { isPending, error, signUpMutation } = useSignUp();
+
   const handleSignUp = (e) => {
     e.preventDefault()
+    signUpMutation(SignUpData)
   }
 
   return  <div className="h-screen flex items-center justify-center p-4 sm:p-6 md:p-8" data-theme="coffee">
@@ -25,8 +43,16 @@ const SignUpPage = () => {
       <span className="text-3xl font-bold font-mono bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary tracking-wider">
         Insta
       </span>
-
       </div>
+
+      {/* Error message */}
+
+      {error && (
+        <div className="alert alert-error mb-4">
+          <span>{error.response.data.message}</span>
+        </div>
+      )}
+
 
       <div className = "w-full">
         <form onSubmit={handleSignUp}>
@@ -101,7 +127,14 @@ const SignUpPage = () => {
             </div>
           {/* submit button */}
           <button className ="btn btn-primary w-full" type="submit">
-             Create Account
+             {isPending ? (
+              <>
+                <span className="loading loading-spinner"></span>
+                Loading...
+              </>
+             ) : (
+              "Create Account"
+             )}
           </button>
             <div className="text-center mt-4">
                   <p className="text-sm">
